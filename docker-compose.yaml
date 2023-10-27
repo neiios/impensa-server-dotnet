@@ -1,0 +1,9 @@
+services:
+  impensa-server-dotnet-postgres:
+    container_name: impensa-server-dotnet-postgres
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: impensa-dotnet
+    restart: unless-stopped
