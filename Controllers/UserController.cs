@@ -1,7 +1,7 @@
-using ImpensaServerDotnet.Models;
+using Impensa.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ImpensaServerDotnet.Controllers;
+namespace Impensa.Controllers;
 
 [ApiController]
 [Route("/api/v1/users")]
