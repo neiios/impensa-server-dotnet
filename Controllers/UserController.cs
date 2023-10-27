@@ -1,4 +1,5 @@
 using Impensa.Models;
+using Impensa.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Impensa.Controllers;
@@ -7,44 +8,17 @@ namespace Impensa.Controllers;
 [Route("/api/v1/users")]
 public class UserController : ControllerBase
 {
-    private static List<User> Users { get; } = new()
+
+    private readonly IUserRepository _userRepository;
+
+    public UserController(IUserRepository userRepository)
     {
-        new User
-        {
-            Id = 1,
-            Name = "John Doe",
-            Email = "john@john.com",
-            Password = "pass",
-            Currency = "USD"
-        },
-        new User
-        {
-            Id = 2,
-            Name = "Jane Doe",
-            Email = "aaa",
-            Password = "bbb",
-            Currency = "EUR"
-        }
-    };
-    
-    [HttpGet]
-    public ActionResult<IEnumerable<User>> GetUsers()
-    {
-        return Users;
-    }
-    
-    [HttpGet("{id:int}")]
-    public ActionResult<User> Get(int id)
-    {
-        var item = Users.FirstOrDefault(i => i.Id == id);
-        if (item == null) return new NotFoundResult();
-        return item;
+        _userRepository = userRepository;
     }
 
-    [HttpPost]
-    public ActionResult<User> Post(User item)
+    [HttpGet]
+    public List<User> GetUsers()
     {
-        Users.Add(item);
-        return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
+        return _userRepository.GetAll();
     }
 }
