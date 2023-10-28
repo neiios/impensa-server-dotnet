@@ -20,51 +20,51 @@ public class ExpenseController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public ActionResult<List<ExpenseDisplayDTO>> GetAllExpenses()
-    {
-        var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        var expenses = _context.Expenses
-            .Where(e => e.UserId == userId)
-            .OrderByDescending(e => e.Date)
-            .Select(e => new ExpenseDisplayDTO
-            {
-                Id = e.Id,
-                Amount = e.Amount,
-                Description = e.Description,
-                Date = e.Date.ToUniversalTime(),
-                ExpenseCategoryId = e.ExpenseCategoryId,
-                CategoryName = e.Category.Name
-            })
-            .ToList();
-
-        return expenses;
-    }
-
-    [HttpGet("{id}")]
-    public ActionResult<ExpenseDisplayDTO> GetExpense(Guid id)
-    {
-        var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        var expense = _context.Expenses
-            .Where(e => e.Id == id && e.UserId == userId)
-            .Select(e => new ExpenseDisplayDTO
-            {
-                Id = e.Id,
-                Amount = e.Amount,
-                Description = e.Description,
-                Date = e.Date,
-                ExpenseCategoryId = e.ExpenseCategoryId,
-                CategoryName = e.Category.Name
-            })
-            .FirstOrDefault();
-
-        if (expense == null) return NotFound();
-
-        return expense;
-    }
-
+    // [HttpGet]
+    // public ActionResult<List<ExpenseDisplayDTO>> GetAllExpenses()
+    // {
+    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    //
+    //     var expenses = _context.Expenses
+    //         .Where(e => e.UserId == userId)
+    //         .OrderByDescending(e => e.Date)
+    //         .Select(e => new ExpenseDisplayDTO
+    //         {
+    //             Id = e.Id,
+    //             Amount = e.Amount,
+    //             Description = e.Description,
+    //             Date = e.Date.ToUniversalTime(),
+    //             ExpenseCategoryId = e.ExpenseCategoryId,
+    //             CategoryName = e.Category.Name
+    //         })
+    //         .ToList();
+    //
+    //     return expenses;
+    // }
+    //
+    // [HttpGet("{id}")]
+    // public ActionResult<ExpenseDisplayDTO> GetExpense(Guid id)
+    // {
+    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    //
+    //     var expense = _context.Expenses
+    //         .Where(e => e.Id == id && e.UserId == userId)
+    //         .Select(e => new ExpenseDisplayDTO
+    //         {
+    //             Id = e.Id,
+    //             Amount = e.Amount,
+    //             Description = e.Description,
+    //             Date = e.Date,
+    //             ExpenseCategoryId = e.ExpenseCategoryId,
+    //             CategoryName = e.Category.Name
+    //         })
+    //         .FirstOrDefault();
+    //
+    //     if (expense == null) return NotFound();
+    //
+    //     return expense;
+    // }
+    //
     // [HttpPost]
     // public ActionResult<ExpenseDisplayDTO> CreateExpense(ExpenseCreateDTO expenseDto)
     // {
@@ -94,40 +94,40 @@ public class ExpenseController : ControllerBase
     //
     //     return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, createdExpenseDto);
     // }
-
-    [HttpPut("{id}")]
-    public IActionResult UpdateExpense(Guid id, ExpenseUpdateDTO expenseDto)
-    {
-        if (id != expenseDto.Id) return BadRequest();
-
-        var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        var existingExpense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-        if (existingExpense == null) return NotFound();
-
-        existingExpense.Amount = expenseDto.Amount;
-        existingExpense.Description = expenseDto.Description;
-        existingExpense.ExpenseCategoryId = expenseDto.ExpenseCategoryId;
-
-        // Add any other fields you want to update
-
-        _context.Entry(existingExpense).State = EntityState.Modified;
-        _context.SaveChanges();
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public IActionResult DeleteExpense(Guid id)
-    {
-        var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        var expense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-        if (expense == null) return NotFound();
-
-        _context.Expenses.Remove(expense);
-        _context.SaveChanges();
-
-        return NoContent();
-    }
+    //
+    // [HttpPut("{id}")]
+    // public IActionResult UpdateExpense(Guid id, ExpenseUpdateDTO expenseDto)
+    // {
+    //     if (id != expenseDto.Id) return BadRequest();
+    //
+    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    //
+    //     var existingExpense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
+    //     if (existingExpense == null) return NotFound();
+    //
+    //     existingExpense.Amount = expenseDto.Amount;
+    //     existingExpense.Description = expenseDto.Description;
+    //     existingExpense.ExpenseCategoryId = expenseDto.ExpenseCategoryId;
+    //
+    //     // Add any other fields you want to update
+    //
+    //     _context.Entry(existingExpense).State = EntityState.Modified;
+    //     _context.SaveChanges();
+    //
+    //     return NoContent();
+    // }
+    //
+    // [HttpDelete("{id}")]
+    // public IActionResult DeleteExpense(Guid id)
+    // {
+    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    //
+    //     var expense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
+    //     if (expense == null) return NotFound();
+    //
+    //     _context.Expenses.Remove(expense);
+    //     _context.SaveChanges();
+    //
+    //     return NoContent();
+    // }
 }
