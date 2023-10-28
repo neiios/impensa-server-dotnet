@@ -1,6 +1,7 @@
 using System.Text;
 using Impensa.Configuration;
 using Impensa.Repositories;
+using Impensa.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -36,6 +37,8 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 var app = builder.Build();
 

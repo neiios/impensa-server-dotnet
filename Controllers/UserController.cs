@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Impensa.DTOs.Users;
 using Impensa.Models;
 using Impensa.Repositories;
+using Impensa.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +13,12 @@ namespace Impensa.Controllers;
 public class UserController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public UserController(AppDbContext context)
+    public UserController(AppDbContext context, IEmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     private Guid GetUserIdFromJwt()
@@ -65,6 +68,8 @@ public class UserController : ControllerBase
         _context.ExpenseCategories.RemoveRange(categories);
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
+
+        await _emailService.SendDeletionEmail(user);
 
         return Ok();
     }

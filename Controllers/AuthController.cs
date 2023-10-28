@@ -5,6 +5,7 @@ using Impensa.Configuration;
 using Impensa.DTOs.Users;
 using Impensa.Models;
 using Impensa.Repositories;
+using Impensa.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,13 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
     {
         _context = context;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     private string GenerateJwtToken(string guid)
@@ -77,6 +80,8 @@ public class AuthController : ControllerBase
             Currency = user.Currency,
             JwtToken = GenerateJwtToken(user.Id.ToString())
         };
+
+        await _emailService.SendWelcomeEmail(user);
 
         return Ok(returnDto);
     }
