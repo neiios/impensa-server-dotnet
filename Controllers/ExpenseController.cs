@@ -36,7 +36,7 @@ public class ExpenseController : ControllerBase
             Id = e.Id,
             Amount = e.Amount,
             Description = e.Description,
-            Date = e.Date,
+            CreatedAt = e.CreatedAt,
             ExpenseCategory = new ExpenseCategoryResponseDto
             {
                 Id = e.Category!.Id,
@@ -51,7 +51,6 @@ public class ExpenseController : ControllerBase
         {
             Amount = expenseDto.Amount,
             Description = expenseDto.Description,
-            Date = expenseDto.Date,
             ExpenseCategoryId = expenseDto.ExpenseCategoryId,
             UserId = userId
         };
@@ -64,7 +63,7 @@ public class ExpenseController : ControllerBase
 
         var expenses = await _context.Expenses
             .Where(e => e.UserId == userId)
-            .OrderByDescending(e => e.Date)
+            .OrderByDescending(e => e.CreatedAt)
             .Select(e => MapExpenseToResponseDto(e))
             .ToListAsync();
 
@@ -87,6 +86,7 @@ public class ExpenseController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
         var expense = MapExpenseRequestDtoToExpense(expenseDto, userId);
+        expense.CreatedAt = DateTime.Now;
 
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
@@ -109,7 +109,7 @@ public class ExpenseController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteExpense(Guid id)
     {
         var userId = GetUserIdFromJwt();

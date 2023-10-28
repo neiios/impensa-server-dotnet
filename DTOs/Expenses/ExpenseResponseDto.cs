@@ -5,11 +5,11 @@ namespace Impensa.DTOs.Expenses;
 
 public class ExpenseResponseDto
 {
-    [Required] public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-    [Required] public decimal Amount { get; set; }
+    public decimal Amount { get; set; }
 
-    [Required] public required DateTime Date { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public string? Description { get; set; }
 
