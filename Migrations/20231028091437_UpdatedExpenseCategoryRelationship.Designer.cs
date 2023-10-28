@@ -3,6 +3,7 @@ using System;
 using Impensa.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Impensa.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231028091437_UpdatedExpenseCategoryRelationship")]
+    partial class UpdatedExpenseCategoryRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,6 +63,9 @@ namespace Impensa.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ExpenseId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -68,6 +74,8 @@ namespace Impensa.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExpenseId");
 
                     b.HasIndex("UserId");
 
@@ -125,6 +133,10 @@ namespace Impensa.Migrations
 
             modelBuilder.Entity("Impensa.Models.ExpenseCategory", b =>
                 {
+                    b.HasOne("Impensa.Models.Expense", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("ExpenseId");
+
                     b.HasOne("Impensa.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -132,6 +144,11 @@ namespace Impensa.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Impensa.Models.Expense", b =>
+                {
+                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }
