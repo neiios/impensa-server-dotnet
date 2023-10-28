@@ -44,7 +44,10 @@ public class ExpenseCategoryController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ExpenseCategoryResponseDto>> GetCategory(Guid id)
     {
-        var category = await _context.ExpenseCategories.FindAsync(id);
+        var userId = GetUserIdFromJwt();
+
+        var category = await _context.ExpenseCategories
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (category == null) return NotFound();
 
         return new ExpenseCategoryResponseDto { Id = category.Id, Name = category.Name };
