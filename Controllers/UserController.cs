@@ -8,17 +8,17 @@ namespace Impensa.Controllers;
 [Route("/api/v1/users")]
 public class UserController : ControllerBase
 {
+    private readonly AppDbContext _context;
 
-    private readonly IUserRepository _userRepository;
-
-    public UserController(IUserRepository userRepository)
+    public UserController(AppDbContext context)
     {
-        _userRepository = userRepository;
+        _context = context;
     }
 
+    // TODO: this endpoint makes no sense and should be removed later
     [HttpGet]
     public List<User> GetUsers()
     {
-        return _userRepository.GetAll();
+        return _context.Users.ToList();
     }
 }

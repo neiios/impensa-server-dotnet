@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Impensa.Migrations
 {
-    [DbContext(typeof(MainDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20231027140453_InitialCreate")]
     partial class InitialCreate
     {
