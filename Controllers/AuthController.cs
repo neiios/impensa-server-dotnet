@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Impensa.Configuration;
-using Impensa.DTOS.Users;
+using Impensa.DTOs.Users;
 using Impensa.Models;
 using Impensa.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -85,16 +85,10 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> SignIn(UserSigninRequestDto dto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (user == null)
-        {
-            return BadRequest(new { Message = "Invalid email or password" });
-        }
+        if (user == null) return BadRequest(new { Message = "Invalid email or password" });
 
         var validPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
-        if (!validPassword)
-        {
-            return BadRequest(new { Message = "Invalid email or password" });
-        }
+        if (!validPassword) return BadRequest(new { Message = "Invalid email or password" });
 
         var returnDto = new UserResponseDto
         {

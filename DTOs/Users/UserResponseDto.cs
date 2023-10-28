@@ -1,6 +1,4 @@
-using Microsoft.IdentityModel.Tokens;
-
-namespace Impensa.DTOS.Users;
+namespace Impensa.DTOs.Users;
 
 public class UserResponseDto
 {

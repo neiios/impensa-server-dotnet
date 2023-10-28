@@ -1,20 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Impensa.DTOS.Users;
+namespace Impensa.DTOs.Users;
 
 public class UserSignupRequestDto
 {
     [Required(ErrorMessage = "Username is required")]
+    [MaxLength(255, ErrorMessage = "Field cannot be more than 255 characters")]
     public required string Username { get; set; }
-    
+
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress]
     public required string Email { get; set; }
-    
+
     [Required(ErrorMessage = "Currency is required")]
+    [MaxLength(255, ErrorMessage = "Field cannot be more than 255 characters")]
     public required string Currency { get; set; }
-    
+
     [Required(ErrorMessage = "Password is required")]
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
+    [MaxLength(255, ErrorMessage = "Field cannot be more than 255 characters")]
     public required string Password { get; set; }
 }

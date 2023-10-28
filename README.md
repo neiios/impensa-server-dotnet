@@ -32,4 +32,5 @@ After running these commands, you should be able to access the API at `http://lo
 
 ## License
 
-This project is free software and is distributed under the [AGPL (GNU Affero General Public License)](https://www.gnu.org/licenses/agpl-3.0.en.html).
+This project is free software and is distributed under
+the [AGPL (GNU Affero General Public License)](https://www.gnu.org/licenses/agpl-3.0.en.html).
