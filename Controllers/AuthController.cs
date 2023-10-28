@@ -1,8 +1,14 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Impensa.Configuration;
 using Impensa.DTOs;
 using Impensa.Models;
 using Impensa.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Impensa.Controllers;
 
@@ -11,10 +17,37 @@ namespace Impensa.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(AppDbContext context)
+    public AuthController(AppDbContext context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
+    }
+
+    private string GenerateJwtToken(User user)
+    {
+        var jwtSettings = new JwtSettings();
+        _configuration.Bind("JwtSettings", jwtSettings);
+
+        var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            }),
+            Expires = DateTime.UtcNow.AddMinutes(jwtSettings.DurationInMinutes),
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+            Issuer = jwtSettings.Issuer,
+            Audience = jwtSettings.Audience
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 
     [HttpPost("signup")]
@@ -40,14 +73,18 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Email is already taken" });
         }
 
-        return Ok(new ReturnUserDetailsDto
+        var token = GenerateJwtToken(user);
+        return Ok(new
         {
-            Username = user.Username,
-            Email = user.Email,
-            Currency = user.Currency
+            Token = token,
+            UserDetails = new ReturnUserDetailsDto
+            {
+                Username = user.Username,
+                Email = user.Email,
+                Currency = user.Currency
+            }
         });
     }
-
 
     [HttpPost("signin")]
     public async Task<IActionResult> SignIn(LoginUserDetailsDto loginDto)
@@ -64,11 +101,21 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Invalid email or password" });
         }
 
-        // Here you'd generate a JWT or another authentication token and return it.
-        // For the sake of simplicity, I'll just return an "Authenticated" message.
-        return Ok();
+        var token = GenerateJwtToken(user);
+
+        return Ok(new
+        {
+            Token = token,
+            UserDetails = new ReturnUserDetailsDto
+            {
+                Username = user.Username,
+                Email = user.Email,
+                Currency = user.Currency
+            }
+        });
     }
 
+    [Authorize]
     [HttpGet("verify")]
     public IActionResult Verify()
     {
