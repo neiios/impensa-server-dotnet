@@ -1,5 +1,6 @@
 using System.Security.Claims;
-using Impensa.DTOs;
+using Impensa.DTOs.ExpenseCategories;
+using Impensa.DTOs.Expenses;
 using Impensa.Models;
 using Impensa.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -8,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Impensa.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("/api/v1/expenses")]
-[Authorize]
 public class ExpenseController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -20,114 +21,105 @@ public class ExpenseController : ControllerBase
         _context = context;
     }
 
-    // [HttpGet]
-    // public ActionResult<List<ExpenseDisplayDTO>> GetAllExpenses()
-    // {
-    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //
-    //     var expenses = _context.Expenses
-    //         .Where(e => e.UserId == userId)
-    //         .OrderByDescending(e => e.Date)
-    //         .Select(e => new ExpenseDisplayDTO
-    //         {
-    //             Id = e.Id,
-    //             Amount = e.Amount,
-    //             Description = e.Description,
-    //             Date = e.Date.ToUniversalTime(),
-    //             ExpenseCategoryId = e.ExpenseCategoryId,
-    //             CategoryName = e.Category.Name
-    //         })
-    //         .ToList();
-    //
-    //     return expenses;
-    // }
-    //
-    // [HttpGet("{id}")]
-    // public ActionResult<ExpenseDisplayDTO> GetExpense(Guid id)
-    // {
-    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //
-    //     var expense = _context.Expenses
-    //         .Where(e => e.Id == id && e.UserId == userId)
-    //         .Select(e => new ExpenseDisplayDTO
-    //         {
-    //             Id = e.Id,
-    //             Amount = e.Amount,
-    //             Description = e.Description,
-    //             Date = e.Date,
-    //             ExpenseCategoryId = e.ExpenseCategoryId,
-    //             CategoryName = e.Category.Name
-    //         })
-    //         .FirstOrDefault();
-    //
-    //     if (expense == null) return NotFound();
-    //
-    //     return expense;
-    // }
-    //
-    // [HttpPost]
-    // public ActionResult<ExpenseDisplayDTO> CreateExpense(ExpenseCreateDTO expenseDto)
-    // {
-    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //
-    //     var expense = new Expense
-    //     {
-    //         Amount = expenseDto.Amount,
-    //         Description = expenseDto.Description,
-    //         Date = expenseDto.Date,
-    //         ExpenseCategoryId = expenseDto.ExpenseCategoryId,
-    //         UserId = userId
-    //     };
-    //
-    //     _context.Expenses.Add(expense);
-    //     _context.SaveChanges();
-    //
-    //     var createdExpenseDto = new ExpenseDisplayDTO
-    //     {
-    //         Id = expense.Id,
-    //         Amount = expense.Amount,
-    //         Description = expense.Description,
-    //         Date = expense.Date,
-    //         ExpenseCategoryId = expense.ExpenseCategoryId,
-    //         CategoryName = expense.Category.Name
-    //     };
-    //
-    //     return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, createdExpenseDto);
-    // }
-    //
-    // [HttpPut("{id}")]
-    // public IActionResult UpdateExpense(Guid id, ExpenseUpdateDTO expenseDto)
-    // {
-    //     if (id != expenseDto.Id) return BadRequest();
-    //
-    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //
-    //     var existingExpense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-    //     if (existingExpense == null) return NotFound();
-    //
-    //     existingExpense.Amount = expenseDto.Amount;
-    //     existingExpense.Description = expenseDto.Description;
-    //     existingExpense.ExpenseCategoryId = expenseDto.ExpenseCategoryId;
-    //
-    //     // Add any other fields you want to update
-    //
-    //     _context.Entry(existingExpense).State = EntityState.Modified;
-    //     _context.SaveChanges();
-    //
-    //     return NoContent();
-    // }
-    //
-    // [HttpDelete("{id}")]
-    // public IActionResult DeleteExpense(Guid id)
-    // {
-    //     var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //
-    //     var expense = _context.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-    //     if (expense == null) return NotFound();
-    //
-    //     _context.Expenses.Remove(expense);
-    //     _context.SaveChanges();
-    //
-    //     return NoContent();
-    // }
+    private Guid GetUserIdFromJwt()
+    {
+        var guid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(guid)) throw new ArgumentException("User id not found in JWT token");
+
+        return Guid.Parse(guid);
+    }
+
+    private static ExpenseResponseDto MapExpenseToResponseDto(Expense e)
+    {
+        return new ExpenseResponseDto
+        {
+            Id = e.Id,
+            Amount = e.Amount,
+            Description = e.Description,
+            Date = e.Date,
+            ExpenseCategory = new ExpenseCategoryResponseDto
+            {
+                Id = e.Category!.Id,
+                Name = e.Category.Name
+            }
+        };
+    }
+
+    private static Expense MapExpenseRequestDtoToExpense(ExpenseRequestDto expenseDto, Guid userId)
+    {
+        return new Expense
+        {
+            Amount = expenseDto.Amount,
+            Description = expenseDto.Description,
+            Date = expenseDto.Date,
+            ExpenseCategoryId = expenseDto.ExpenseCategoryId,
+            UserId = userId
+        };
+    }
+
+    [HttpGet]
+    public async Task<List<ExpenseResponseDto>> GetAllExpenses()
+    {
+        var userId = GetUserIdFromJwt();
+
+        var expenses = await _context.Expenses
+            .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.Date)
+            .Select(e => MapExpenseToResponseDto(e))
+            .ToListAsync();
+
+        return expenses;
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ExpenseResponseDto>> GetExpense(Guid id)
+    {
+        var userId = GetUserIdFromJwt();
+
+        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        if (expense == null) return NotFound();
+
+        return MapExpenseToResponseDto(expense);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ExpenseResponseDto>> CreateExpense(ExpenseRequestDto expenseDto)
+    {
+        var userId = GetUserIdFromJwt();
+        var expense = MapExpenseRequestDtoToExpense(expenseDto, userId);
+
+        _context.Expenses.Add(expense);
+        await _context.SaveChangesAsync();
+
+        return MapExpenseToResponseDto(expense);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<ExpenseResponseDto>> UpdateExpense(Guid id, ExpenseRequestDto dto)
+    {
+        var userId = GetUserIdFromJwt();
+
+        var existingExpense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        if (existingExpense == null) return NotFound();
+
+        var updatedExpense = MapExpenseRequestDtoToExpense(dto, userId);
+        updatedExpense.Id = existingExpense.Id;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteExpense(Guid id)
+    {
+        var userId = GetUserIdFromJwt();
+
+        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        if (expense == null) return NotFound();
+
+        _context.Expenses.Remove(expense);
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
 }
