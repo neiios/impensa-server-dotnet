@@ -10,5 +10,5 @@ public class ExpenseRequestDto
 
     [Required] public Guid ExpenseCategoryId { get; set; }
 
-    public required string Description { get; set; }
+    [MaxLength(2048)] public required string Description { get; set; }
 }

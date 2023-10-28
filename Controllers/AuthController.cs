@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> SignUp(UserSignupRequestDto requestDto)
+    public async Task<IActionResult> SignUp(UserInfoRequestDto requestDto)
     {
         var user = new User
         {

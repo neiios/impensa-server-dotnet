@@ -36,7 +36,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<ActionResult<User>> UpdateUserInfo(UserSignupRequestDto dto)
+    public async Task<ActionResult<User>> UpdateUserInfo(UserInfoRequestDto dto)
     {
         var userId = GetUserIdFromJwt();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -69,7 +69,7 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    private static User MapUserSignupRequestDtoToUser(UserSignupRequestDto dto)
+    private static User MapUserSignupRequestDtoToUser(UserInfoRequestDto dto)
     {
         return new User
         {
