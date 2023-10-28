@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Impensa.DTOs;
+namespace Impensa.DTOS.Users;
 
-public class CreateUserDetailsDto
+public class UserSignupRequestDto
 {
     [Required(ErrorMessage = "Username is required")]
     public required string Username { get; set; }

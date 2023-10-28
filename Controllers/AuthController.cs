@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Impensa.Configuration;
-using Impensa.DTOs;
+using Impensa.DTOS.Users;
 using Impensa.Models;
 using Impensa.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -25,19 +25,17 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    private string GenerateJwtToken(User user)
+    private string GenerateJwtToken(string guid)
     {
         var jwtSettings = new JwtSettings();
         _configuration.Bind("JwtSettings", jwtSettings);
-
         var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, guid)
             }),
             Expires = DateTime.UtcNow.AddMinutes(jwtSettings.DurationInMinutes),
             SigningCredentials =
@@ -51,15 +49,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public async Task<IActionResult> SignUp(CreateUserDetailsDto userDetailsDto)
+    public async Task<IActionResult> SignUp(UserSignupRequestDto requestDto)
     {
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDetailsDto.Password);
         var user = new User
         {
-            Username = userDetailsDto.Username,
-            Email = userDetailsDto.Email,
-            Currency = userDetailsDto.Currency,
-            Password = hashedPassword
+            Username = requestDto.Username,
+            Email = requestDto.Email,
+            Currency = requestDto.Currency,
+            Password = BCrypt.Net.BCrypt.HashPassword(requestDto.Password)
         };
 
         try
@@ -73,52 +70,49 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Email is already taken" });
         }
 
-        var token = GenerateJwtToken(user);
-        return Ok(new
+        var returnDto = new UserResponseDto
         {
-            Token = token,
-            UserDetails = new ReturnUserDetailsDto
-            {
-                Username = user.Username,
-                Email = user.Email,
-                Currency = user.Currency
-            }
-        });
+            Username = user.Username,
+            Email = user.Email,
+            Currency = user.Currency,
+            JwtToken = GenerateJwtToken(user.Id.ToString())
+        };
+
+        return Ok(returnDto);
     }
 
     [HttpPost("signin")]
-    public async Task<IActionResult> SignIn(LoginUserDetailsDto loginDto)
+    public async Task<IActionResult> SignIn(UserSigninRequestDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null)
         {
             return BadRequest(new { Message = "Invalid email or password" });
         }
 
-        var validPassword = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
+        var validPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
         if (!validPassword)
         {
             return BadRequest(new { Message = "Invalid email or password" });
         }
 
-        var token = GenerateJwtToken(user);
-
-        return Ok(new
+        var returnDto = new UserResponseDto
         {
-            Token = token,
-            UserDetails = new ReturnUserDetailsDto
-            {
-                Username = user.Username,
-                Email = user.Email,
-                Currency = user.Currency
-            }
-        });
+            Username = user.Username,
+            Email = user.Email,
+            Currency = user.Currency,
+            JwtToken = GenerateJwtToken(user.Id.ToString())
+        };
+
+        return Ok(returnDto);
     }
 
     [Authorize]
     [HttpGet("verify")]
     public IActionResult Verify()
     {
-        return Ok();
+        var userId = User.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        return Ok(new { token = userId });
     }
 }
