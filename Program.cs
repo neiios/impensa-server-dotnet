@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+        .UseSnakeCaseNamingConvention()
 );
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
