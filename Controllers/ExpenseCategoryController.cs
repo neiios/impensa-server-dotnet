@@ -102,7 +102,7 @@ public class ExpenseCategoryController : ControllerBase
         existingCategory.Name = dto.Name;
         await _context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(existingCategory);
     }
 
 
@@ -118,6 +118,6 @@ public class ExpenseCategoryController : ControllerBase
         _context.ExpenseCategories.Remove(category);
         await _context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(category);
     }
 }
