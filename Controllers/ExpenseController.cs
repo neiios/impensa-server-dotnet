@@ -62,11 +62,12 @@ public class ExpenseController : ControllerBase
         var userId = GetUserIdFromJwt();
 
         var expenses = await _context.Expenses
+            .Include(x => x.Category)
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.CreatedAt)
             .Select(e => MapExpenseToResponseDto(e))
             .ToListAsync();
-
+        
         return expenses;
     }
 
@@ -75,8 +76,9 @@ public class ExpenseController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
-        if (expense == null) return NotFound();
+        var expense = await _context.Expenses
+            .Include(x => x.Category)
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
         return MapExpenseToResponseDto(expense);
     }
@@ -86,12 +88,17 @@ public class ExpenseController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
         var expense = MapExpenseRequestDtoToExpense(expenseDto, userId);
-        expense.CreatedAt = DateTime.Now;
+        expense.CreatedAt = DateTime.UtcNow;
 
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
 
+        expense = await _context.Expenses
+            .Include(x => x.Category)
+            .FirstOrDefaultAsync(e => e.Id == expense.Id);
+
         return MapExpenseToResponseDto(expense);
+
     }
 
     [HttpPut("{id:guid}")]
