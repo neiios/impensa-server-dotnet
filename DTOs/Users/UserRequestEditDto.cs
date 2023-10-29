@@ -11,5 +11,5 @@ public class UserRequestEditDto
 
     [MinLength(6)] [MaxLength(255)] public required string Password { get; set; }
     
-    [MinLength(6)] [MaxLength(255)] public string NewPassword { get; set; }
+    [MinLength(6)] [MaxLength(255)] public string? NewPassword { get; set; }
 }
