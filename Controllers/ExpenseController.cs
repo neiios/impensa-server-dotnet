@@ -39,20 +39,22 @@ public class ExpenseController : ControllerBase
             CreatedAt = e.CreatedAt,
             ExpenseCategory = new ExpenseCategoryResponseDto
             {
-                Id = e.Category!.Id,
-                Name = e.Category.Name
+                Id = e.ExpenseCategory.Id,
+                Name = e.ExpenseCategory.Name
             }
         };
     }
 
-    private static Expense MapExpenseRequestDtoToExpense(ExpenseRequestDto expenseDto, Guid userId)
+    private static Expense MapExpenseRequestDtoToExpense(ExpenseRequestDto expenseDto, ExpenseCategory category,
+        User user, DateTime createdAt)
     {
         return new Expense
         {
             Amount = expenseDto.Amount,
             Description = expenseDto.Description,
-            ExpenseCategoryId = expenseDto.ExpenseCategoryId,
-            UserId = userId
+            User = user,
+            ExpenseCategory = category,
+            CreatedAt = createdAt
         };
     }
 
@@ -62,7 +64,7 @@ public class ExpenseController : ControllerBase
         var userId = GetUserIdFromJwt();
 
         var expenses = await _context.Expenses
-            .Where(e => e.UserId == userId)
+            .Where(e => e.User.Id == userId)
             .OrderByDescending(e => e.CreatedAt)
             .Select(e => MapExpenseToResponseDto(e))
             .ToListAsync();
@@ -75,18 +77,25 @@ public class ExpenseController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.User.Id == userId);
         if (expense == null) return NotFound();
 
         return MapExpenseToResponseDto(expense);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ExpenseResponseDto>> CreateExpense(ExpenseRequestDto expenseDto)
+    public async Task<ActionResult<ExpenseResponseDto>> CreateExpense(ExpenseRequestDto dto)
     {
         var userId = GetUserIdFromJwt();
-        var expense = MapExpenseRequestDtoToExpense(expenseDto, userId);
-        expense.CreatedAt = DateTime.Now;
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return NotFound(new { Message = "User not found" });
+
+        var category = await _context.ExpenseCategories
+            .FirstOrDefaultAsync(c => c.Id == dto.ExpenseCategoryId);
+        if (category == null) return NotFound(new { Message = "Category not found" });
+
+        var expense = MapExpenseRequestDtoToExpense(dto, category, user, DateTime.UtcNow);
+        expense.CreatedAt = DateTime.UtcNow;
 
         _context.Expenses.Add(expense);
         await _context.SaveChangesAsync();
@@ -98,11 +107,17 @@ public class ExpenseController : ControllerBase
     public async Task<ActionResult<ExpenseResponseDto>> UpdateExpense(Guid id, ExpenseRequestDto dto)
     {
         var userId = GetUserIdFromJwt();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return NotFound(new { Message = "User not found" });
 
-        var existingExpense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        var category = await _context.ExpenseCategories
+            .FirstOrDefaultAsync(c => c.Id == dto.ExpenseCategoryId);
+        if (category == null) return NotFound(new { Message = "Category not found" });
+
+        var existingExpense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.User.Id == userId);
         if (existingExpense == null) return NotFound();
 
-        var updatedExpense = MapExpenseRequestDtoToExpense(dto, userId);
+        var updatedExpense = MapExpenseRequestDtoToExpense(dto, category, user, existingExpense.CreatedAt);
         updatedExpense.Id = existingExpense.Id;
         await _context.SaveChangesAsync();
 
@@ -114,7 +129,7 @@ public class ExpenseController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.User.Id == userId);
         if (expense == null) return NotFound();
 
         _context.Expenses.Remove(expense);

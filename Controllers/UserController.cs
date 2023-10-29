@@ -60,9 +60,9 @@ public class UserController : ControllerBase
         if (user == null) return NotFound();
 
         var expenses = _context.Expenses
-            .Where(e => e.UserId == userId);
+            .Where(e => e.User.Id == userId);
         var categories = _context.ExpenseCategories
-            .Where(c => c.UserId == userId);
+            .Where(c => c.User.Id == userId);
 
         _context.Expenses.RemoveRange(expenses);
         _context.ExpenseCategories.RemoveRange(categories);

@@ -112,6 +112,6 @@ public class AuthController : ControllerBase
     {
         var userId = User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        return Ok(new { token = userId });
+        return Ok(new { userId });
     }
 }

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Impensa.DTOs.ExpenseCategories;
 
 namespace Impensa.DTOs.Expenses;

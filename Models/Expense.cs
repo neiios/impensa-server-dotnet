@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Impensa.Models;
 
 public class Expense
@@ -7,11 +5,8 @@ public class Expense
     public Guid Id { get; set; }
     public required decimal Amount { get; set; }
     public string? Description { get; set; }
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public required Guid ExpenseCategoryId { get; set; }
-    public ExpenseCategory? Category { get; set; }
-
-    public required Guid UserId { get; set; }
-    public User? User { get; set; }
+    public required ExpenseCategory ExpenseCategory { get; set; }
+    public required User User { get; set; }
 }
