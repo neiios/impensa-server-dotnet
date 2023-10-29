@@ -39,18 +39,35 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<ActionResult<User>> UpdateUserInfo(UserInfoRequestDto dto)
+    public async Task<ActionResult<User>> UpdateUserInfo(UserRequestEditDto dto)
     {
         var userId = GetUserIdFromJwt();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
-        var updatedUser = MapUserSignupRequestDtoToUser(dto);
-        updatedUser.Id = user.Id;
+        // Verify current password
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+        {
+            return BadRequest("The current password is incorrect.");
+        }
+    
+        // If a new password is provided and it's different from the current password, update it
+        if (!string.IsNullOrEmpty(dto.NewPassword))
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        }
+    
+        // Update other fields
+        user.Username = dto.Username;
+        user.Email = dto.Email;
+        user.Currency = dto.Currency;
+
         await _context.SaveChangesAsync();
 
         return Ok(user);
     }
+
+
 
     [HttpDelete]
     public async Task<ActionResult> DeleteUser()
