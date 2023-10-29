@@ -44,17 +44,17 @@ public class UserController : ControllerBase
         var userId = GetUserIdFromJwt();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound("User not found");
-
+        
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
         {
-            return BadRequest("The current password is incorrect.");
+            return BadRequest("Password is incorrect.");
         }
-
+        
         if (!string.IsNullOrEmpty(dto.NewPassword))
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         }
-
+        
         user.Username = dto.Username;
         user.Email = dto.Email;
         user.Currency = dto.Currency;
@@ -65,12 +65,17 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<ActionResult> DeleteUser()
+    public async Task<ActionResult> DeleteUser(UserRequestRemoveDto dto)
     {
         var userId = GetUserIdFromJwt();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound();
-
+        
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+        {
+            return BadRequest("Password is incorrect.");
+        }
+        
         var expenses = _context.Expenses
             .Where(e => e.User.Id == userId);
         var categories = _context.ExpenseCategories
