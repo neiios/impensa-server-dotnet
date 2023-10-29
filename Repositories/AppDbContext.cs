@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public required DbSet<Expense> Expenses { get; set; }
     public required DbSet<ExpenseCategory> ExpenseCategories { get; set; }
 
+    public DbSet<UserLog> UserActivityLogs { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

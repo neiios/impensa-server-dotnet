@@ -43,6 +43,8 @@ builder.Services.AddScoped<IDefaultCategoriesService, DefaultCategoriesService>(
 
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+builder.Services.AddScoped<IUserActivityService, UserActivityService>();
+
 var app = builder.Build();
 
 app.UseSwagger();
