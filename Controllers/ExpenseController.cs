@@ -64,6 +64,7 @@ public class ExpenseController : ControllerBase
         var userId = GetUserIdFromJwt();
 
         var expenses = await _context.Expenses
+            .Include(e => e.ExpenseCategory)
             .Where(e => e.User.Id == userId)
             .OrderByDescending(e => e.CreatedAt)
             .Select(e => MapExpenseToResponseDto(e))
