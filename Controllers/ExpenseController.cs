@@ -119,7 +119,8 @@ public class ExpenseController : ControllerBase
         if (existingExpense == null) return NotFound();
 
         var updatedExpense = MapExpenseRequestDtoToExpense(dto, category, user, existingExpense.CreatedAt);
-        updatedExpense.Id = existingExpense.Id;
+        existingExpense.Description = updatedExpense.Description;
+        existingExpense.Amount = updatedExpense.Amount;
         await _context.SaveChangesAsync();
 
         return NoContent();
