@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Impensa.Configuration;
 using Impensa.DTOs.Users;
+using Impensa.DTOs.UserLog;
 using Impensa.Models;
 using Impensa.Repositories;
 using Impensa.Services;
@@ -21,17 +22,21 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
     private readonly IDefaultCategoriesService _defaultCategoriesService; 
+    private readonly IUserActivityService _userActivityService; 
     
     public AuthController(
         AppDbContext context, 
         IConfiguration configuration, 
         IEmailService emailService,
-        IDefaultCategoriesService defaultCategoriesService)
+        IDefaultCategoriesService defaultCategoriesService,
+        IUserActivityService userActivityService)
+    
     {
         _context = context;
         _configuration = configuration;
         _emailService = emailService;
         _defaultCategoriesService = defaultCategoriesService;
+        _userActivityService = userActivityService; 
     }
 
 
@@ -104,6 +109,19 @@ public class AuthController : ControllerBase
         var validPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
         if (!validPassword) return BadRequest(new { Message = "Invalid email or password" });
 
+        string ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        string browser = Request.Headers["User-Agent"].ToString();
+
+        var logDto = new UserLogRequestDto
+        {
+            UserId = user.Id,
+            Date = DateTime.UtcNow,
+            IP = ip,
+            Browser = browser
+        };
+
+        await _userActivityService.LogActivityAsync(logDto);
+
         var returnDto = new UserResponseDto
         {
             Username = user.Username,
@@ -114,6 +132,7 @@ public class AuthController : ControllerBase
 
         return Ok(returnDto);
     }
+
 
     [Authorize]
     [HttpGet("verify")]
