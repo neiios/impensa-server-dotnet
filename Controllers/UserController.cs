@@ -45,19 +45,16 @@ public class UserController : ControllerBase
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound("User not found");
 
-        // Verify current password
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
         {
             return BadRequest("The current password is incorrect.");
         }
-    
-        // If a new password is provided and it's different from the current password, update it
+
         if (!string.IsNullOrEmpty(dto.NewPassword))
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         }
-    
-        // Update other fields
+
         user.Username = dto.Username;
         user.Email = dto.Email;
         user.Currency = dto.Currency;
@@ -66,8 +63,6 @@ public class UserController : ControllerBase
 
         return Ok(user);
     }
-
-
 
     [HttpDelete]
     public async Task<ActionResult> DeleteUser()
@@ -89,16 +84,5 @@ public class UserController : ControllerBase
         await _emailService.SendDeletionEmail(user);
 
         return Ok();
-    }
-
-    private static User MapUserSignupRequestDtoToUser(UserInfoRequestDto dto)
-    {
-        return new User
-        {
-            Username = dto.Username,
-            Email = dto.Email,
-            Password = dto.Password,
-            Currency = dto.Currency
-        };
     }
 }
