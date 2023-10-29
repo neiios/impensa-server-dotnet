@@ -20,13 +20,20 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
-
-    public AuthController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
+    private readonly IDefaultCategoriesService _defaultCategoriesService; 
+    
+    public AuthController(
+        AppDbContext context, 
+        IConfiguration configuration, 
+        IEmailService emailService,
+        IDefaultCategoriesService defaultCategoriesService)
     {
         _context = context;
         _configuration = configuration;
         _emailService = emailService;
+        _defaultCategoriesService = defaultCategoriesService;
     }
+
 
     private string GenerateJwtToken(string guid)
     {
@@ -66,6 +73,8 @@ public class AuthController : ControllerBase
         {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            await _defaultCategoriesService.CreateDefaultCategoriesForUser(user.Id);
+
         }
         catch (DbUpdateException ex)
         {

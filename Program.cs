@@ -39,6 +39,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IDefaultCategoriesService, DefaultCategoriesService>();
+
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 var app = builder.Build();
