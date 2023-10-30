@@ -21,22 +21,22 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
-    private readonly IDefaultCategoriesService _defaultCategoriesService; 
-    private readonly IUserActivityService _userActivityService; 
-    
+    private readonly IDefaultCategoriesService _defaultCategoriesService;
+    private readonly IUserActivityService _userActivityService;
+
     public AuthController(
-        AppDbContext context, 
-        IConfiguration configuration, 
+        AppDbContext context,
+        IConfiguration configuration,
         IEmailService emailService,
         IDefaultCategoriesService defaultCategoriesService,
         IUserActivityService userActivityService)
-    
+
     {
         _context = context;
         _configuration = configuration;
         _emailService = emailService;
         _defaultCategoriesService = defaultCategoriesService;
-        _userActivityService = userActivityService; 
+        _userActivityService = userActivityService;
     }
 
 
@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
     {
         var jwtSettings = new JwtSettings();
         _configuration.Bind("JwtSettings", jwtSettings);
-        var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
+        var key = Encoding.ASCII.GetBytes(jwtSettings.Key!);
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -109,8 +109,8 @@ public class AuthController : ControllerBase
         var validPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
         if (!validPassword) return BadRequest(new { Message = "Invalid email or password" });
 
-        string ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-        string browser = Request.Headers["User-Agent"].ToString();
+        var ip = HttpContext.Connection.RemoteIpAddress!.ToString();
+        var browser = Request.Headers["User-Agent"].ToString();
 
         var logDto = new UserLogRequestDto
         {
