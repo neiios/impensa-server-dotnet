@@ -22,12 +22,15 @@ cd server-dotnet
 docker compose up -d
 
 # Restore the necessary dependencies
+dotnet tool restore
 dotnet restore
 
 # Setup mailjet api keys
 dotnet user-secrets init
 dotnet user-secrets set "API_KEY" "0000000"
 dotnet user-secrets set "SECRET_KEY" "0000000"
+
+dotnet ef database update
 
 # Run the project
 dotnet run
