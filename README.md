@@ -42,8 +42,13 @@ After running these commands, you should be able to access the API at `http://lo
 
 - [x] Add email notifications on registration
 - [x] Migrate to .NET 8
-- [ ] Implement password reset
-- [ ] Implement oAuth
+- [ ] Allow users to specify expense date
+- [ ] Budget for category on expenses page (see fancy mockup)
+- [ ] Contact/bug report form
+- [ ] Admin panel with reports
+- [ ] Password recovery
+- [ ] oAuth
+- [ ] 2fa
 - [ ] Docker support
 - [ ] Deploy the application
 
