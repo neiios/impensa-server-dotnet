@@ -1,4 +1,4 @@
-# Impensa WebAPI
+# Impensa .Net
 
 This repository contains the backend implementation for [Impensa](https://github.com/richard96292/impensa).
 
@@ -37,6 +37,15 @@ dotnet run
 ```
 
 After running these commands, you should be able to access the API at `http://localhost:5274`.
+
+## Second Increment
+
+- [x] Add email notifications on registration
+- [x] Migrate to .NET 8
+- [ ] Implement password reset
+- [ ] Implement oAuth
+- [ ] Docker support
+- [ ] Deploy the application
 
 ## License
 
