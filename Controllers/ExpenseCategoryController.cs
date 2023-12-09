@@ -11,15 +11,8 @@ namespace Impensa.Controllers;
 [Authorize]
 [ApiController]
 [Route("/api/v1/categories")]
-public class ExpenseCategoryController : ControllerBase
+public class ExpenseCategoryController(AppDbContext context) : ControllerBase
 {
-    private readonly AppDbContext _context;
-
-    public ExpenseCategoryController(AppDbContext context)
-    {
-        _context = context;
-    }
-
     private Guid GetUserIdFromJwt()
     {
         var guid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -33,7 +26,7 @@ public class ExpenseCategoryController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var categoryResponseDtos = await _context.ExpenseCategories
+        var categoryResponseDtos = await context.ExpenseCategories
             .Where(c => c.User.Id == userId)
             .Select(c => new ExpenseCategoryResponseDto { Id = c.Id, Name = c.Name })
             .ToListAsync();
@@ -46,7 +39,7 @@ public class ExpenseCategoryController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var category = await _context.ExpenseCategories
+        var category = await context.ExpenseCategories
             .FirstOrDefaultAsync(c => c.Id == id && c.User.Id == userId);
         if (category == null) return NotFound();
 
@@ -58,12 +51,12 @@ public class ExpenseCategoryController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var existingCategory = await _context.ExpenseCategories
+        var existingCategory = await context.ExpenseCategories
             .FirstOrDefaultAsync(c => c.User.Id == userId && c.Name == dto.Name);
         if (existingCategory != null)
             return Conflict(new { message = "Category with this name already exists for this user" });
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound("User not found");
 
         var newCategory = new ExpenseCategory
@@ -72,8 +65,8 @@ public class ExpenseCategoryController : ControllerBase
             User = user
         };
 
-        _context.ExpenseCategories.Add(newCategory);
-        await _context.SaveChangesAsync();
+        context.ExpenseCategories.Add(newCategory);
+        await context.SaveChangesAsync();
 
         var responseDto = new ExpenseCategoryResponseDto
         {
@@ -90,17 +83,17 @@ public class ExpenseCategoryController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var existingCategory = await _context.ExpenseCategories
+        var existingCategory = await context.ExpenseCategories
             .FirstOrDefaultAsync(c => c.Id == id && c.User.Id == userId);
         if (existingCategory == null) return NotFound();
 
-        var sameNameCategory = await _context.ExpenseCategories
+        var sameNameCategory = await context.ExpenseCategories
             .FirstOrDefaultAsync(c => c.User.Id == userId && c.Name == dto.Name);
         if (sameNameCategory != null)
             return Conflict(new { message = "Category with this name already exists for this user" });
 
         existingCategory.Name = dto.Name;
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return Ok(existingCategory);
     }
@@ -111,12 +104,12 @@ public class ExpenseCategoryController : ControllerBase
     {
         var userId = GetUserIdFromJwt();
 
-        var category = await _context.ExpenseCategories
+        var category = await context.ExpenseCategories
             .FirstOrDefaultAsync(c => c.Id == id && c.User.Id == userId);
         if (category == null) return NotFound();
 
-        _context.ExpenseCategories.Remove(category);
-        await _context.SaveChangesAsync();
+        context.ExpenseCategories.Remove(category);
+        await context.SaveChangesAsync();
 
         return Ok(category);
     }

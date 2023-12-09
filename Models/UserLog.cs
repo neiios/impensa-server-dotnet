@@ -7,7 +7,6 @@ public class UserLog
     public DateTime Date { get; set; }
     public string IP { get; set; }
     public string Browser { get; set; }
-    
-    public virtual User User { get; set; }
 
+    public virtual User User { get; set; }
 }

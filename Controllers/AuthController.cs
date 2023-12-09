@@ -2,8 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Impensa.Configuration;
-using Impensa.DTOs.Users;
 using Impensa.DTOs.UserLog;
+using Impensa.DTOs.Users;
 using Impensa.Models;
 using Impensa.Repositories;
 using Impensa.Services;
@@ -63,7 +63,6 @@ public class AuthController(
             context.Users.Add(user);
             await context.SaveChangesAsync();
             await defaultCategoriesService.CreateDefaultCategoriesForUser(user.Id);
-
         }
         catch (DbUpdateException ex)
         {
@@ -94,7 +93,7 @@ public class AuthController(
         if (!validPassword) return BadRequest(new { Message = "Invalid email or password" });
 
         var ip = HttpContext.Connection.RemoteIpAddress!.ToString();
-        var browser = Request.Headers["User-Agent"].ToString();
+        var browser = Request.Headers.UserAgent.ToString();
 
         var logDto = new UserLogRequestDto
         {

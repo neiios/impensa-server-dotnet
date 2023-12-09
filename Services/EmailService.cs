@@ -4,15 +4,8 @@ using Mailjet.Client.TransactionalEmails;
 
 namespace Impensa.Services;
 
-public class EmailService : IEmailService
+public class EmailService(IConfiguration configuration) : IEmailService
 {
-    private readonly IConfiguration _configuration;
-
-    public EmailService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public async Task SendWelcomeEmail(User user)
     {
         var deletionEmail = $"""
@@ -62,8 +55,8 @@ public class EmailService : IEmailService
 
     private async Task SendEmail(string subject, string textPart, string userEmail)
     {
-        var apiKey = _configuration["API_KEY"];
-        var secretKey = _configuration["SECRET_KEY"];
+        var apiKey = configuration["API_KEY"];
+        var secretKey = configuration["SECRET_KEY"];
 
         var client = new MailjetClient(
             apiKey,
