@@ -25,7 +25,7 @@ builder.Services.AddAuthentication("cookie")
         o.ClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID")!;
         o.ClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET")!;
         o.SignInScheme = "cookie";
-        o.CallbackPath = "/api/v1/auth/github-cb";
+        o.CallbackPath = $"{Environment.GetEnvironmentVariable("CLIENT_ADDRESS")}/api/v1/auth/github-cb";
         o.Scope.Add("user:email");
     });
 
