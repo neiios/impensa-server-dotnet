@@ -46,6 +46,10 @@ namespace Impensa.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("expense_category_id");
 
+                    b.Property<DateTime>("SpentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("spent_at");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
@@ -99,7 +103,6 @@ namespace Impensa.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -108,7 +111,6 @@ namespace Impensa.Migrations
                         .HasColumnName("is_read");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("title");
 
@@ -123,6 +125,35 @@ namespace Impensa.Migrations
                         .HasDatabaseName("ix_notifications_user_id");
 
                     b.ToTable("notifications", (string)null);
+                });
+
+            modelBuilder.Entity("Impensa.Models.Report", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<bool>("isSolved")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_solved");
+
+                    b.HasKey("Id")
+                        .HasName("pk_reports");
+
+                    b.ToTable("reports", (string)null);
                 });
 
             modelBuilder.Entity("Impensa.Models.User", b =>
