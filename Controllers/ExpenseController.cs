@@ -114,12 +114,14 @@ public class ExpenseController(AppDbContext context) : ControllerBase
         if (existingExpense == null) return NotFound();
 
         var updatedExpense = MapExpenseRequestDtoToExpense(dto, category, user, existingExpense.CreatedAt, dto.SpentAt);
-        existingExpense.Description = updatedExpense.Description;
-        existingExpense.Amount = updatedExpense.Amount;
-        existingExpense.SpentAt = updatedExpense.SpentAt;
+        existingExpense.Description = dto.Description;
+        existingExpense.Amount = dto.Amount;
+        existingExpense.ExpenseCategory = category;
+        existingExpense.SpentAt = dto.SpentAt;
+
         await context.SaveChangesAsync();
 
-        return NoContent();
+        return MapExpenseToResponseDto(existingExpense);
     }
 
     [HttpDelete("{id:guid}")]
