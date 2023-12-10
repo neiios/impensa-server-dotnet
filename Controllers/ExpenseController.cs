@@ -30,6 +30,7 @@ public class ExpenseController(AppDbContext context) : ControllerBase
             Amount = e.Amount,
             Description = e.Description,
             CreatedAt = e.CreatedAt,
+            SpentAt = e.SpentAt,
             ExpenseCategory = new ExpenseCategoryResponseDto
             {
                 Id = e.ExpenseCategory.Id,
@@ -39,7 +40,7 @@ public class ExpenseController(AppDbContext context) : ControllerBase
     }
 
     private static Expense MapExpenseRequestDtoToExpense(ExpenseRequestDto expenseDto, ExpenseCategory category,
-        User user, DateTime createdAt)
+        User user, DateTime createdAt, DateTime spentAt)
     {
         return new Expense
         {
@@ -47,7 +48,8 @@ public class ExpenseController(AppDbContext context) : ControllerBase
             Description = expenseDto.Description,
             User = user,
             ExpenseCategory = category,
-            CreatedAt = createdAt
+            CreatedAt = createdAt,
+            SpentAt = spentAt,
         };
     }
 
@@ -88,7 +90,7 @@ public class ExpenseController(AppDbContext context) : ControllerBase
             .FirstOrDefaultAsync(c => c.Id == dto.ExpenseCategoryId);
         if (category == null) return NotFound(new { Message = "Category not found" });
 
-        var expense = MapExpenseRequestDtoToExpense(dto, category, user, DateTime.UtcNow);
+        var expense = MapExpenseRequestDtoToExpense(dto, category, user, DateTime.UtcNow, dto.SpentAt);
         expense.CreatedAt = DateTime.UtcNow;
 
         context.Expenses.Add(expense);
@@ -111,9 +113,10 @@ public class ExpenseController(AppDbContext context) : ControllerBase
         var existingExpense = await context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.User.Id == userId);
         if (existingExpense == null) return NotFound();
 
-        var updatedExpense = MapExpenseRequestDtoToExpense(dto, category, user, existingExpense.CreatedAt);
+        var updatedExpense = MapExpenseRequestDtoToExpense(dto, category, user, existingExpense.CreatedAt, dto.SpentAt);
         existingExpense.Description = updatedExpense.Description;
         existingExpense.Amount = updatedExpense.Amount;
+        existingExpense.SpentAt = updatedExpense.SpentAt;
         await context.SaveChangesAsync();
 
         return NoContent();
