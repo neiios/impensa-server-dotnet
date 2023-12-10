@@ -48,7 +48,7 @@ public class AuthService(
         return user;
     }
 
-    public async Task CreateGithubUserOrConvertToLocalCookie(HttpContext ctx, ClaimsPrincipal principal,
+    public async Task<User> CreateGithubUserOrConvertToLocalCookie(HttpContext ctx, ClaimsPrincipal principal,
         string cookieId)
     {
         var githubId = ulong.Parse(cookieId);
@@ -59,7 +59,8 @@ public class AuthService(
         if (githubUser != null)
         {
             await GenerateLocalCookie(ctx, githubUser.UserId);
-            return;
+            var oldUser = await dbctx.Users.FirstOrDefaultAsync(u => u.Id == githubUser.UserId);
+            return oldUser!;
         }
 
         // if github user doesn't exist, check if email is registered
@@ -76,6 +77,7 @@ public class AuthService(
             await dbctx.SaveChangesAsync();
 
             await GenerateLocalCookie(ctx, newGithubUser.UserId);
+            return user;
         }
         // else create new account with github
         else
@@ -99,6 +101,8 @@ public class AuthService(
             await defaultCategoriesService.CreateDefaultCategoriesForUser(newUser.Id);
             await emailService.SendWelcomeEmail(newUser);
             await GenerateLocalCookie(ctx, newUser.Id);
+
+            return newUser;
         }
     }
 }

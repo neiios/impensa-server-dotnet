@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IDefaultCategoriesService, DefaultCategoriesService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IUserActivityService, UserActivityService>();
+builder.Services.AddScoped<UserActivityService>();
 builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();

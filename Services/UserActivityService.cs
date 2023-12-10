@@ -1,22 +1,25 @@
+using System.Security.Claims;
 using Impensa.DTOs.UserLog;
 using Impensa.Models;
 using Impensa.Repositories;
 
 namespace Impensa.Services;
 
-public class UserActivityService(AppDbContext context) : IUserActivityService
+public class UserActivityService(AppDbContext dbctx)
 {
-    public async Task LogActivityAsync(UserLogRequestDto logDto)
+    public async Task LogActivityAsync(HttpContext ctx, HttpRequest req, ClaimsPrincipal principal, Guid userId)
     {
-        var logEntry = new UserLog
+        var ip = ctx.Connection.RemoteIpAddress!.ToString();
+        var browser = req.Headers.UserAgent.ToString();
+        
+        dbctx.UserActivityLogs.Add(new UserLog
         {
-            UserId = logDto.UserId,
-            Date = logDto.Date,
-            IP = logDto.IP,
-            Browser = logDto.Browser
-        };
-
-        context.UserActivityLogs.Add(logEntry);
-        await context.SaveChangesAsync();
+            UserId = userId,
+            Date = DateTime.UtcNow,
+            IP = ip,
+            Browser = browser
+        });
+        
+        await dbctx.SaveChangesAsync();
     }
 }

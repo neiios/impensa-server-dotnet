@@ -1,12 +1,14 @@
 using System.Security.Claims;
 using Impensa.DTOs.UserLog;
 using Impensa.DTOs.Users;
+using Impensa.Models;
 using Impensa.Repositories;
 using Impensa.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Impensa.Controllers;
 
@@ -14,9 +16,7 @@ namespace Impensa.Controllers;
 [Route("/api/v1/auth")]
 public class AuthController(
     AppDbContext dbctx,
-    IEmailService emailService,
-    IDefaultCategoriesService defaultCategoriesService,
-    IUserActivityService userActivityService,
+    UserActivityService userActivityService,
     AuthService authService)
     : ControllerBase
 {
@@ -26,6 +26,7 @@ public class AuthController(
         try
         {
             var user = await authService.CreateLocalUser(HttpContext, requestDto);
+            await userActivityService.LogActivityAsync(HttpContext, Request, User, user.Id);
             return Ok(new
             {
                 user.Username,
@@ -53,19 +54,7 @@ public class AuthController(
             "cookie"));
         await HttpContext.SignInAsync("cookie", claimsPrincipal);
 
-        // Log user activity as before
-        var ip = HttpContext.Connection.RemoteIpAddress!.ToString();
-        var browser = Request.Headers.UserAgent.ToString();
-
-        var logDto = new UserLogRequestDto
-        {
-            UserId = user.Id,
-            Date = DateTime.UtcNow,
-            IP = ip,
-            Browser = browser
-        };
-
-        await userActivityService.LogActivityAsync(logDto);
+        await userActivityService.LogActivityAsync(HttpContext, Request, User, user.Id);
 
         return Ok(new
         {
@@ -95,7 +84,8 @@ public class AuthController(
         if (Guid.TryParse(cookieId, out var userId)) return Ok();
 
         // work with github
-        await authService.CreateGithubUserOrConvertToLocalCookie(HttpContext, User, cookieId);
+        var user = await authService.CreateGithubUserOrConvertToLocalCookie(HttpContext, User, cookieId);
+        await userActivityService.LogActivityAsync(HttpContext, Request, User, user.Id);
 
         return Ok();
     }
