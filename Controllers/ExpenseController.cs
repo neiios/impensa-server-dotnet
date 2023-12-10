@@ -40,7 +40,7 @@ public class ExpenseController(AppDbContext context) : ControllerBase
     }
 
     private static Expense MapExpenseRequestDtoToExpense(ExpenseRequestDto expenseDto, ExpenseCategory category,
-        User user, DateTime createdAt, DateTime spentAt)
+        User user, DateTime createdAt, DateOnly spentAt)
     {
         return new Expense
         {
