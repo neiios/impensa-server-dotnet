@@ -4,6 +4,6 @@ namespace Impensa.DTOs.Notifications;
 
 public class NotificationRequestDto
 {
-    [MaxLength(2048)] public required string Title { get; set; }
-    [MaxLength(2048)] public required string Description { get; set; }
+    [MaxLength(200)] public required string Title { get; set; }
+    [MaxLength(1000)] public required string Description { get; set; }
 }
