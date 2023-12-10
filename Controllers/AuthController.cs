@@ -69,7 +69,7 @@ public class AuthController(
     public IResult Github()
     {
         return Results.Challenge(
-            new AuthenticationProperties { RedirectUri = "http://localhost:3000/signin" },
+            new AuthenticationProperties { RedirectUri = $"{Environment.GetEnvironmentVariable("CLIENT_ADDRESS")}/signin" },
             authenticationSchemes: new[] { "github" });
     }
 

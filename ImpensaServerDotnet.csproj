@@ -12,6 +12,7 @@
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.0.0" />
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
+        <PackageReference Include="DotNetEnv" Version="2.5.0" />
         <PackageReference Include="EFCore.NamingConventions" Version="8.0.0-rc.2"/>
         <PackageReference Include="Mailjet.Api" Version="3.0.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />

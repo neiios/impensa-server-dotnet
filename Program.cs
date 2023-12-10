@@ -2,11 +2,12 @@ using Impensa.Repositories;
 using Impensa.Services;
 using Microsoft.EntityFrameworkCore;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING"))
         .UseSnakeCaseNamingConvention()
 );
 
@@ -21,8 +22,8 @@ builder.Services.AddAuthentication("cookie")
     })
     .AddGitHub("github", o =>
     {
-        o.ClientId = configuration["GITHUB_CLIENT_ID"] ?? throw new InvalidOperationException();
-        o.ClientSecret = configuration["GITHUB_CLIENT_SECRET"] ?? throw new InvalidOperationException();
+        o.ClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID")!;
+        o.ClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET")!;
         o.SignInScheme = "cookie";
         o.CallbackPath = "/api/v1/auth/github-cb";
         o.Scope.Add("user:email");
@@ -39,8 +40,11 @@ builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

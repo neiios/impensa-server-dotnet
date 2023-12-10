@@ -55,8 +55,8 @@ public class EmailService(IConfiguration configuration) : IEmailService
 
     private async Task SendEmail(string subject, string textPart, string userEmail)
     {
-        var apiKey = configuration["API_KEY"];
-        var secretKey = configuration["SECRET_KEY"];
+        var apiKey = Environment.GetEnvironmentVariable("MAILJET_API_KEY");
+        var secretKey = Environment.GetEnvironmentVariable("MAILJET_SECRET_KEY");
 
         var client = new MailjetClient(
             apiKey,

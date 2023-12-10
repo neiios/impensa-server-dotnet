@@ -25,20 +25,21 @@ docker compose up -d
 dotnet tool restore
 dotnet restore
 
-dotnet user-secrets init
-
-# Setup mailjet api keys
-dotnet user-secrets set "API_KEY" ""
-dotnet user-secrets set "SECRET_KEY" ""
-
-# Github oAuth keys
-dotnet user-secrets set "GITHUB_CLIENT_ID" ""
-dotnet user-secrets set "GITHUB_CLIENT_SECRET" ""
-
 dotnet ef database update
 
 # Run the project
 dotnet run
+```
+
+Create a .env file in the root of the repository and fill the following template:
+
+```dotenv
+POSTGRES_CONNECTION_STRING="Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres;"
+GITHUB_CLIENT_ID="000"
+GITHUB_CLIENT_SECRET="000"
+MAILJET_API_KEY="000"
+MAILJET_SECRET_KEY="000"
+CLIENT_ADDRESS="http://localhost:3000"
 ```
 
 After running these commands, you should be able to access the API at `http://localhost:5274`.
