@@ -55,8 +55,8 @@ After running these commands, you should be able to access the API at `http://lo
 - [ ] Admin panel with reports
 - [ ] Password recovery
 - [ ] Expand logs (on signin, signup, add message to logs)
-- [x] oAuth with github to create an account (or add to an existing one) 
-- [ ] Docker support
+- [x] oAuth with github to create an account (or add to an existing one)
+- [x] Docker support
 - [ ] Deploy the application
 
 ## License
