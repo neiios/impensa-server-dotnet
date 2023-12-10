@@ -1,5 +1,7 @@
 using Impensa.Repositories;
 using Impensa.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 
 DotNetEnv.Env.Load();
@@ -25,9 +27,27 @@ builder.Services.AddAuthentication("cookie")
         o.ClientId = Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID")!;
         o.ClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET")!;
         o.SignInScheme = "cookie";
-        o.CallbackPath = $"{Environment.GetEnvironmentVariable("CLIENT_ADDRESS")}/api/v1/auth/github-cb";
+        o.CallbackPath = "/api/v1/auth/github-cb";
+        o.Events.OnRedirectToAuthorizationEndpoint = MakeHttps;
         o.Scope.Add("user:email");
     });
+
+Task MakeHttps(RedirectContext<OAuthOptions> arg)
+{
+    // When behind a load balancer the redirect URL, which is configured as CallbackPath in the appsettings.json
+    // is created as HTTP because the HTTPS request is terminated at the NLB and is forwarded in clear text.
+
+    // The policy of most OAuth IDPs is to disallow clear HTTP redirect URLs.
+
+    if (!arg.RedirectUri.Contains("redirect_uri=https", StringComparison.OrdinalIgnoreCase))
+    {
+        arg.RedirectUri = arg.RedirectUri.Replace("redirect_uri=http","redirect_uri=https", StringComparison.OrdinalIgnoreCase);
+    }
+
+    arg.HttpContext.Response.Redirect(arg.RedirectUri);
+
+    return Task.CompletedTask;
+}
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -61,6 +81,7 @@ if (DotNetEnv.Env.GetBool("PRODUCTION"))
         logger.LogInformation("Database not ready yet; waiting...");
         Thread.Sleep(1000);
     }
+
     try
     {
         serviceScope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
