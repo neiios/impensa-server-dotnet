@@ -25,6 +25,7 @@ builder.Services.AddAuthentication("cookie")
         o.ClientSecret = configuration["GITHUB_CLIENT_SECRET"] ?? throw new InvalidOperationException();
         o.SignInScheme = "cookie";
         o.CallbackPath = "/api/v1/auth/github-cb";
+        o.Scope.Add("user:email");
     });
 
 builder.Services.AddControllers();
