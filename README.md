@@ -40,6 +40,7 @@ GITHUB_CLIENT_SECRET="000"
 MAILJET_API_KEY="000"
 MAILJET_SECRET_KEY="000"
 CLIENT_ADDRESS="http://localhost:3000"
+PRODUCTION=false
 ```
 
 After running these commands, you should be able to access the API at `http://localhost:5274`.
