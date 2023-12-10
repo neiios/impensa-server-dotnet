@@ -69,7 +69,7 @@ public class NotificationsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NotificationResponseDto>>> GetAllNotifications(
-        bool? isRead, DateTime? startDate, DateTime? endDate, string searchQuery, bool recentOnly = false)
+        bool? isRead, DateTime? startDate, DateTime? endDate, string searchQuery = null, bool recentOnly = false)
     {
         var userId = GetUserIdFromJwt();
         IQueryable<Notification> query = context.Notifications.Where(n => n.UserId == userId);
