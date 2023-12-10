@@ -52,7 +52,7 @@ After running these commands, you should be able to access the API at `http://lo
 - [ ] Contact/bug report form
 - [ ] Admin panel with reports
 - [ ] Password recovery
-- [ ] oAuth
+- [x] oAuth
 - [ ] Docker support
 - [ ] Deploy the application
 
