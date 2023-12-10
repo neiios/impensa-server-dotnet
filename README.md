@@ -25,10 +25,15 @@ docker compose up -d
 dotnet tool restore
 dotnet restore
 
-# Setup mailjet api keys
 dotnet user-secrets init
-dotnet user-secrets set "API_KEY" "0000000"
-dotnet user-secrets set "SECRET_KEY" "0000000"
+
+# Setup mailjet api keys
+dotnet user-secrets set "API_KEY" ""
+dotnet user-secrets set "SECRET_KEY" ""
+
+# Github oAuth keys
+dotnet user-secrets set "GITHUB_CLIENT_ID" ""
+dotnet user-secrets set "GITHUB_CLIENT_SECRET" ""
 
 dotnet ef database update
 
@@ -48,7 +53,6 @@ After running these commands, you should be able to access the API at `http://lo
 - [ ] Admin panel with reports
 - [ ] Password recovery
 - [ ] oAuth
-- [ ] 2fa
 - [ ] Docker support
 - [ ] Deploy the application
 

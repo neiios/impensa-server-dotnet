@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Impensa.Models;
 
 public class User
 {
-    public Guid Id { get; set; }
-    public required string Username { get; set; }
-    public required string Email { get; set; }
-    public required string Password { get; set; }
-    public required string Currency { get; set; }
+    public Guid Id { get; init; }
+    [MaxLength(255)] public required string Username { get; set; }
+    [MaxLength(255)] public required string Email { get; set; }
+    [MaxLength(255)] public string? Password { get; set; }
+    [MaxLength(255)] public required string Currency { get; set; }
 }
