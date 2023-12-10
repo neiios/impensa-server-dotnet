@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public required DbSet<Expense> Expenses { get; set; }
     public required DbSet<ExpenseCategory> ExpenseCategories { get; set; }
     public required DbSet<UserLog> UserActivityLogs { get; set; }
+    public required DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
