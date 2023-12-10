@@ -10,6 +10,8 @@ public class ExpenseResponseDto
 
     public DateTime? CreatedAt { get; set; }
 
+    public DateOnly? SpentAt {get; set; }
+
     public string? Description { get; set; }
 
     public required ExpenseCategoryResponseDto ExpenseCategory { get; set; }

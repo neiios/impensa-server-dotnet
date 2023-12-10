@@ -3,6 +3,7 @@ using System;
 using Impensa.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Impensa.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231210114322_Notifications")]
+    partial class Notifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,10 +48,6 @@ namespace Impensa.Migrations
                     b.Property<Guid>("ExpenseCategoryId")
                         .HasColumnType("uuid")
                         .HasColumnName("expense_category_id");
-
-                    b.Property<DateOnly>("SpentAt")
-                        .HasColumnType("date")
-                        .HasColumnName("spent_at");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -103,6 +102,7 @@ namespace Impensa.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -111,6 +111,7 @@ namespace Impensa.Migrations
                         .HasColumnName("is_read");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("title");
 
@@ -125,35 +126,6 @@ namespace Impensa.Migrations
                         .HasDatabaseName("ix_notifications_user_id");
 
                     b.ToTable("notifications", (string)null);
-                });
-
-            modelBuilder.Entity("Impensa.Models.Report", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.Property<bool>("isSolved")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_solved");
-
-                    b.HasKey("Id")
-                        .HasName("pk_reports");
-
-                    b.ToTable("reports", (string)null);
                 });
 
             modelBuilder.Entity("Impensa.Models.User", b =>
