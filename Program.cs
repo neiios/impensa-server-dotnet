@@ -28,26 +28,8 @@ builder.Services.AddAuthentication("cookie")
         o.ClientSecret = Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET")!;
         o.SignInScheme = "cookie";
         o.CallbackPath = "/api/v1/auth/github-cb";
-        o.Events.OnRedirectToAuthorizationEndpoint = MakeHttps;
         o.Scope.Add("user:email");
     });
-
-Task MakeHttps(RedirectContext<OAuthOptions> arg)
-{
-    // When behind a load balancer the redirect URL, which is configured as CallbackPath in the appsettings.json
-    // is created as HTTP because the HTTPS request is terminated at the NLB and is forwarded in clear text.
-
-    // The policy of most OAuth IDPs is to disallow clear HTTP redirect URLs.
-
-    if (!arg.RedirectUri.Contains("redirect_uri=https", StringComparison.OrdinalIgnoreCase))
-    {
-        arg.RedirectUri = arg.RedirectUri.Replace("redirect_uri=http","redirect_uri=https", StringComparison.OrdinalIgnoreCase);
-    }
-
-    arg.HttpContext.Response.Redirect(arg.RedirectUri);
-
-    return Task.CompletedTask;
-}
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
