@@ -17,6 +17,7 @@ namespace Impensa.Controllers;
 public class AuthController(
     AppDbContext dbctx,
     UserActivityService userActivityService,
+    IEmailService emailService,
     AuthService authService)
     : ControllerBase
 {
@@ -72,6 +73,37 @@ public class AuthController(
             new AuthenticationProperties { RedirectUri = $"{Environment.GetEnvironmentVariable("CLIENT_ADDRESS")}/signin" },
             authenticationSchemes: new[] { "github" });
     }
+    
+    [HttpGet("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromQuery] string email)
+    {
+        var user = await dbctx.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null) return BadRequest(new { Message = "Invalid email" });
+
+        var token = await authService.GeneratePasswordResetToken(user);
+        await emailService.SendPasswordResetEmail(user, token);
+
+        return Ok();
+    }
+    
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto dto)
+    {
+        var user = await dbctx.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (user == null) return BadRequest(new { Message = "Invalid email" });
+
+        var validToken = authService.ValidatePasswordResetToken(user, dto.Token);
+        if (!validToken) return BadRequest(new { Message = "Invalid token" });
+
+        user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        user.PassswordResetToken = null;
+        user.PasswordResetTokenExpiresAt = null;
+        await dbctx.SaveChangesAsync();
+
+        await emailService.SendPasswordResetConfirmationEmail(user);
+        
+        return Ok();
+    }
 
     [Authorize]
     [HttpGet("verify")]
@@ -89,7 +121,7 @@ public class AuthController(
 
         return Ok();
     }
-
+    
     [Authorize]
     [HttpPost("signout")]
     public async Task<IActionResult> Signout()

@@ -6,7 +6,7 @@ namespace Impensa.Services;
 
 public class EmailService(IConfiguration configuration) : IEmailService
 {
-    public async Task SendWelcomeEmail(User user)
+    public Task SendWelcomeEmail(User user)
     {
         var deletionEmail = $"""
                              Dear {user.Username},
@@ -28,10 +28,10 @@ public class EmailService(IConfiguration configuration) : IEmailService
                              """;
         const string subject = "Impensa - Welcome. Bienvenue. Willkommen. Bienvenido.";
 
-        await SendEmail(subject, deletionEmail, user.Email);
+        return SendEmail(subject, deletionEmail, user.Email);
     }
 
-    public async Task SendDeletionEmail(User user)
+    public Task SendDeletionEmail(User user)
     {
         var deletionEmail = $"""
                              Dear {user.Username},
@@ -50,10 +50,47 @@ public class EmailService(IConfiguration configuration) : IEmailService
                              """;
         const string subject = "Goodbye from Impensa. We're Here if You Return!";
 
-        await SendEmail(subject, deletionEmail, user.Email);
+        return SendEmail(subject, deletionEmail, user.Email);
     }
 
-    private async Task SendEmail(string subject, string textPart, string userEmail)
+    public Task SendPasswordResetEmail(User user, string token)
+    {
+        var resetEmail = $"""
+                             Dear {user.Username},
+
+                             We have received a request to reset your password.
+                             If you did not make this request, you can safely ignore this email.
+
+                             To reset your password, enter this code on a password reset page:
+                             {token}
+                             
+
+                             Warm regards,
+                             The Impensa Team
+                             """;
+        const string subject = "Impensa - Password Reset";
+
+        return SendEmail(subject, resetEmail, user.Email);
+    }
+    
+    public Task SendPasswordResetConfirmationEmail(User user)
+    {
+        var resetConfirmEmail = $"""
+                             Dear {user.Username},
+
+                             Your password has been successfully reset.
+
+                             If you did not make this request, please contact us immediately.
+
+                             Warm regards,
+                             The Impensa Team
+                             """;
+        const string subject = "Impensa - Password Reset Confirmation";
+
+        return SendEmail(subject, resetConfirmEmail, user.Email);
+    }
+    
+    private static async Task SendEmail(string subject, string textPart, string userEmail)
     {
         var apiKey = Environment.GetEnvironmentVariable("MAILJET_API_KEY");
         var secretKey = Environment.GetEnvironmentVariable("MAILJET_SECRET_KEY");

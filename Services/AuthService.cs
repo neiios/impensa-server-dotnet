@@ -105,4 +105,19 @@ public class AuthService(
             return newUser;
         }
     }
+    
+    public async Task<string> GeneratePasswordResetToken(User user)
+    {
+        var token = Guid.NewGuid().ToString();
+        user.PassswordResetToken = token;
+        user.PasswordResetTokenExpiresAt = DateTime.UtcNow.AddHours(1);
+        await dbctx.SaveChangesAsync();
+        return token;
+    }
+    
+    public bool ValidatePasswordResetToken(User user, string token)
+    {
+        if (user.PassswordResetToken != token) return false;
+        return user.PasswordResetTokenExpiresAt > DateTime.UtcNow;
+    }
 }
