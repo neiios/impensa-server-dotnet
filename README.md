@@ -59,6 +59,7 @@ Fill in the necessary environment variables before deploying.
 ## Second Increment
 
 - [x] Add email notifications on registration
+- [x] Setup CI pipeline on github
 - [x] Migrate to .NET 8
 - [x] Allow users to specify expense date
 - [x] Notifications for user actions
