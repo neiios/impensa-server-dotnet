@@ -42,12 +42,6 @@ builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
-if (!DotNetEnv.Env.GetBool("PRODUCTION"))
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 if (DotNetEnv.Env.GetBool("PRODUCTION"))
 {
     app.UseDefaultFiles();
@@ -73,6 +67,11 @@ if (DotNetEnv.Env.GetBool("PRODUCTION"))
     {
         logger.LogError(ex, "An error occurred while migrating the database.");
     }
+}
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseAuthentication();
