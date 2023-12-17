@@ -1,12 +1,16 @@
-# Impensa .Net
+# Impensa dotNet
 
 This repository contains the backend implementation for [Impensa](https://github.com/richard96292/impensa).
 
 ## Prerequisites
 
-- .NET Core SDK 7.0
+- dotNET Core SDK 8.0 with the ASP dotNET Core runtime
+- Docker, Podman or other container runtime
 
-## Development Setup & Installation
+## Development Setup
+
+Create a `.env` file in the root of the repository.
+The example is provided in the `.env.example` file.
 
 ```bash
 # Create a new directory for Impensa and navigate into it
@@ -31,33 +35,40 @@ dotnet ef database update
 dotnet run
 ```
 
-Create a .env file in the root of the repository and fill the following template:
+After running these commands, you should be able to access the API at `http://localhost:5274`.
 
-```dotenv
-POSTGRES_CONNECTION_STRING="Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres;"
-GITHUB_CLIENT_ID="000"
-GITHUB_CLIENT_SECRET="000"
-MAILJET_API_KEY="000"
-MAILJET_SECRET_KEY="000"
-CLIENT_ADDRESS="http://localhost:3000"
-PRODUCTION=false
+## Deployment
+
+Ensure the docker images are built locally before deploying.
+Put the Dockerfile in the folder above both the client and server repos.
+
+```text
+impensa
+├── client
+├── server-dotnet
+└── Dockerfile
 ```
 
-After running these commands, you should be able to access the API at `http://localhost:5274`.
+```bash
+sudo docker build -t impensa-server-dotnet:latest .
+```
+
+Use the docker-compose file in the `deploy` folder to deploy the application.
+Fill in the necessary environment variables before deploying.
 
 ## Second Increment
 
 - [x] Add email notifications on registration
 - [x] Migrate to .NET 8
 - [x] Allow users to specify expense date
-- [ ] Budget for category on expenses page (see fancy mockup)
+- [x] Notifications for user actions
+- [x] Account removal
 - [x] Contact/bug report form
 - [ ] Admin panel with reports
 - [ ] Password recovery
-- [ ] Expand logs (on signin, signup, add message to logs)
-- [x] oAuth with github to create an account (or add to an existing one)
+- [x] oAuth with github to create an account
 - [x] Docker support
-- [ ] Deploy the application
+- [x] Deploy the application
 
 ## License
 

@@ -1,0 +1,27 @@
+# Ensure images are built first (run inside the repos):
+# sudo docker build -t impensa-client:latest .
+# sudo docker build -t impensa-server-dotnet:latest .
+
+services:
+  impensa-server-dotnet:
+    image: impensa-server-dotnet:latest
+    container_name: impensa-server-dotnet
+    ports:
+      - "5000:8080"
+    environment:
+      - POSTGRES_CONNECTION_STRING=Host=impensa-server-dotnet-postgres-prod;Port=5432;Username=postgres;Password=postgres;Database=impensa-dotnet;
+      - GITHUB_CLIENT_ID=000
+      - GITHUB_CLIENT_SECRET=000
+      - MAILJET_API_KEY=000
+      - MAILJET_SECRET_KEY=000
+      - CLIENT_ADDRESS=http://localhost:5000
+      - PRODUCTION=true
+    depends_on:
+      - impensa-server-dotnet-postgres-prod
+  impensa-server-dotnet-postgres-prod:
+    container_name: impensa-server-dotnet-postgres-prod
+    image: docker.io/postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: impensa-dotnet
