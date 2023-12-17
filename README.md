@@ -64,7 +64,7 @@ Fill in the necessary environment variables before deploying.
 - [x] Notifications for user actions
 - [x] Account removal
 - [x] Contact/bug report form
-- [ ] Admin panel with reports
+- [x] Admin panel with reports
 - [x] Password recovery
 - [x] oAuth with github to create an account
 - [x] Docker support
