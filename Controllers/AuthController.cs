@@ -106,6 +106,19 @@ public class AuthController(
     }
 
     [Authorize]
+    [HttpGet("is-admin")]
+    public async Task<IActionResult> CheckIsAdmin()
+    {
+        var cookieId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(cookieId)) return BadRequest("no id in cookie");
+
+        var user = await dbctx.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(cookieId));
+        if (user == null) return BadRequest();
+
+        return Ok(new {user.IsAdmin});
+    }
+    
+    [Authorize]
     [HttpGet("verify")]
     public async Task<IActionResult> Verify()
     {
