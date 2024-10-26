@@ -1,48 +1,56 @@
-name: SonarCloud
+name: Build and Analyze
 on:
   push:
     branches:
-      - master
+      - '**'
   pull_request:
-    types: [opened, synchronize, reopened]
+      types: [opened, synchronize, reopened]
 jobs:
   build:
     name: Build and analyze
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    
     steps:
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~\sonar\cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v4
-        with:
-          path: .\.sonar\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"neiios_impensa-server-dotnet" /o:"impensa-sonar" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0
+      
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Restore tools
+      run: dotnet tool restore
+      
+    - name: Begin SonarCloud analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        dotnet sonarscanner begin \
+          /o:"impensa-sonar" \
+          /k:"neiios_impensa-server-dotnet" \
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.cs.opencover.reportsPaths="ImpensaTest/coverage.opencover.xml" \
+          /d:sonar.coverage.exclusions="**/Migrations/**" \
+          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.scanner.scanAll=false
+        
+    - name: Build
+      run: dotnet build
+      
+    - name: Test with coverage
+      run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+      
+    - name: Debug coverage file location
+      run: ls -lah ImpensaTest
+        
+    - name: End SonarCloud analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
