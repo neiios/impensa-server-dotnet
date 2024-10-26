@@ -1,6 +1,7 @@
 using DotNetEnv;
 using ImpensaCore.Repositories;
 using ImpensaCore.Services;
+using Mailjet.Client;
 using Microsoft.EntityFrameworkCore;
 
 Env.Load();
@@ -34,6 +35,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var apiKey = Environment.GetEnvironmentVariable("MAILJET_API_KEY")
+             ?? throw new InvalidOperationException("Environment variable 'MAILJET_API_KEY' is not set.");
+var secretKey = Environment.GetEnvironmentVariable("MAILJET_SECRET_KEY")
+                ?? throw new InvalidOperationException("Environment variable 'MAILJET_SECRET_KEY' is not set.");
+
+builder.Services.AddSingleton(new MailjetClient(apiKey, secretKey));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IDefaultCategoriesService, DefaultCategoriesService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserActivityService>();
