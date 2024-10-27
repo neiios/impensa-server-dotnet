@@ -1,11 +1,10 @@
 using ImpensaCore.Clients;
 using ImpensaCore.Models;
-using Mailjet.Client;
 using Mailjet.Client.TransactionalEmails;
 
 namespace ImpensaCore.Services;
 
-public class EmailService(IConfiguration configuration, IEmailClient emailClient) : IEmailService
+public class EmailService(IEmailClient emailClient) : IEmailService
 {
     public Task SendWelcomeEmail(User user)
     {

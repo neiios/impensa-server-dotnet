@@ -15,9 +15,8 @@ public class EmailServiceTests
 
     public EmailServiceTests()
     {
-        Mock<IConfiguration> configurationMock = new();
         _emailClientMock = new Mock<IEmailClient>();
-        _emailService = new EmailService(configurationMock.Object, _emailClientMock.Object);
+        _emailService = new EmailService(_emailClientMock.Object);
     }
 
     [Fact]
