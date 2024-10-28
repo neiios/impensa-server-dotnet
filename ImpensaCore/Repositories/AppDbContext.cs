@@ -3,22 +3,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImpensaCore.Repositories;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public sealed class AppDbContext : DbContext
 {
-    public required DbSet<User> Users { get; init; }
-    public required DbSet<Expense> Expenses { get; init; }
-    public required DbSet<ExpenseCategory> ExpenseCategories { get; init; }
-    public required DbSet<UserLog> UserActivityLogs { get; init; }
-    public required DbSet<GithubUser> GithubUsers { get; init; }
-    public required DbSet<Notification> Notifications { get; init; }
-    public required DbSet<Report> Reports { get; init; }
-    
-    protected override void OnModelCreating(ModelBuilder builder)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-        base.OnModelCreating(builder);
-        builder.HasPostgresExtension("uuid-ossp");
+        Users = Set<User>();
+        Expenses = Set<Expense>();
+        ExpenseCategories = Set<ExpenseCategory>();
+        UserActivityLogs = Set<UserLog>();
+        GithubUsers = Set<GithubUser>();
+        Notifications = Set<Notification>();
+        Reports = Set<Report>();
+    }
 
-        builder.Entity<User>()
+    public DbSet<User> Users { get; init; }
+    public DbSet<Expense> Expenses { get; init; }
+    public DbSet<ExpenseCategory> ExpenseCategories { get; init; }
+    public DbSet<UserLog> UserActivityLogs { get; init; }
+    public DbSet<GithubUser> GithubUsers { get; init; }
+    public DbSet<Notification> Notifications { get; init; }
+    public DbSet<Report> Reports { get; init; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
     }
