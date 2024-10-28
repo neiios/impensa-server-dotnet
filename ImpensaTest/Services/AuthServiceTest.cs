@@ -293,4 +293,73 @@ public class AuthServiceTests
         var isValid = _authService.ValidatePasswordResetToken(user, token);
         Assert.False(isValid);
     }
+
+
+    [Fact]
+    public async Task CreateLocalUser_EmailAlreadyExists_IncorrectExceptionMessage_ShouldFail()
+    {
+        var existingUser = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "existinguser",
+            Email = "test@example.com",
+            Currency = "USD",
+            Password = "hashedpassword"
+        };
+        _dbContext.Users.Add(existingUser);
+        await _dbContext.SaveChangesAsync();
+
+        var requestDto = new UserInfoRequestDto
+        {
+            Username = "newuser",
+            Email = "test@example.com",
+            Currency = "USD",
+            Password = "password123"
+        };
+
+        var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        {
+            await _authService.CreateLocalUser(_httpContext, requestDto);
+        });
+
+        Assert.Equal("Email is already in use.",
+            exception.Message);
+    }
+    
+    [Fact]
+    public async Task CreateGithubUserOrConvertToLocalCookie_DoesNotCreateGithubUser_ShouldFail()
+    {
+        var githubId = 1234567890UL;
+        var email = "newuser@example.com";
+        var username = "newuser";
+        var principal = CreateClaimsPrincipal(email, username);
+
+        // Mutation: Avoid adding the new GitHub user association in the database
+        var returnedUser = await _authService.CreateGithubUserOrConvertToLocalCookie(_httpContext, principal, githubId.ToString());
+
+        var githubUser = await _dbContext.GithubUsers.FirstOrDefaultAsync(u => u.GithubId == githubId);
+
+        Assert.Null(githubUser); // This assertion should fail as the GitHub user should be created
+    }
+
+    [Fact]
+    public async Task GeneratePasswordResetToken_DoesNotSetExpiration_ShouldFail()
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = "testuser",
+            Email = "test@example.com",
+            Currency = "USD"
+        };
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        var token = await _authService.GeneratePasswordResetToken(user);
+
+        // Mutation: Assert that the expiration time is not set, which should fail
+        Assert.Null(user.PasswordResetTokenExpiresAt); // Should fail since expiration should be set
+    }
+
+    
 }

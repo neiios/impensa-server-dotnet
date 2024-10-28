@@ -1,0 +1,77 @@
+diff --git a/ImpensaCore/Repositories/AppDbContext.cs b/ImpensaCore/Repositories/AppDbContext.cs
+index 3b11e13..d96a3af 100644
+--- a/ImpensaCore/Repositories/AppDbContext.cs
++++ b/ImpensaCore/Repositories/AppDbContext.cs
+@@ -3,22 +3,33 @@ using Microsoft.EntityFrameworkCore;
+ 
+ namespace ImpensaCore.Repositories;
+ 
+-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
++public sealed class AppDbContext : DbContext
+ {
+-    public required DbSet<User> Users { get; init; }
+-    public required DbSet<Expense> Expenses { get; init; }
+-    public required DbSet<ExpenseCategory> ExpenseCategories { get; init; }
+-    public required DbSet<UserLog> UserActivityLogs { get; init; }
+-    public required DbSet<GithubUser> GithubUsers { get; init; }
+-    public required DbSet<Notification> Notifications { get; init; }
+-    public required DbSet<Report> Reports { get; init; }
+-    
+-    protected override void OnModelCreating(ModelBuilder builder)
++    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+     {
+-        base.OnModelCreating(builder);
+-        builder.HasPostgresExtension("uuid-ossp");
++        Users = Set<User>();
++        Expenses = Set<Expense>();
++        ExpenseCategories = Set<ExpenseCategory>();
++        UserActivityLogs = Set<UserLog>();
++        GithubUsers = Set<GithubUser>();
++        Notifications = Set<Notification>();
++        Reports = Set<Report>();
++    }
++
++    public DbSet<User> Users { get; init; }
++    public DbSet<Expense> Expenses { get; init; }
++    public DbSet<ExpenseCategory> ExpenseCategories { get; init; }
++    public DbSet<UserLog> UserActivityLogs { get; init; }
++    public DbSet<GithubUser> GithubUsers { get; init; }
++    public DbSet<Notification> Notifications { get; init; }
++    public DbSet<Report> Reports { get; init; }
++
++    protected override void OnModelCreating(ModelBuilder modelBuilder)
++    {
++        base.OnModelCreating(modelBuilder);
++        modelBuilder.HasPostgresExtension("uuid-ossp");
+ 
+-        builder.Entity<User>()
++        modelBuilder.Entity<User>()
+             .HasIndex(u => u.Email)
+             .IsUnique();
+     }
+diff --git a/ImpensaTest/ImpensaTest.csproj b/ImpensaTest/ImpensaTest.csproj
+index 7fae284..1f4600e 100644
+--- a/ImpensaTest/ImpensaTest.csproj
++++ b/ImpensaTest/ImpensaTest.csproj
+@@ -11,14 +11,17 @@
+ 
+     <ItemGroup>
+         <PackageReference Include="coverlet.msbuild" Version="6.0.2">
+-          <PrivateAssets>all</PrivateAssets>
+-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
++            <PrivateAssets>all</PrivateAssets>
++            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+         </PackageReference>
++        <PackageReference Include="EntityFrameworkCore.Testing.Moq" Version="8.0.0"/>
+         <PackageReference Include="Mailjet.Api" Version="3.0.0"/>
++        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10"/>
++        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10"/>
+         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
++        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
+         <PackageReference Include="Moq" Version="4.20.72"/>
+-        <PackageReference Include="xunit" Version="2.9.2" />
++        <PackageReference Include="xunit" Version="2.9.2"/>
+         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+             <PrivateAssets>all</PrivateAssets>
